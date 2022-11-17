@@ -4,7 +4,7 @@
 	"description": "grow or shrink a grid of data in any direction",
 	"main": "index.js",
 	"scripts": {
-		"test": "jest",
+		"test": "jest --bail --findRelatedTests",
 		"lint": "eslint . --ext .ts --fix"
 	},
 	"repository": {
