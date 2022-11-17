@@ -1,4 +1,4 @@
-import Grid, { GridError } from ".";
+import Grid, { DEFAULT_COLUMN_COUNT, DEFAULT_ROW_COUNT, GridError } from ".";
 
 describe("The Grid object", () => {
 	it("should throw an error with invalid arguments to constructor", () => {
@@ -13,8 +13,8 @@ describe("The Grid object", () => {
 	it("should instanciate with default values", () => {
 		const testGrid = new Grid();
 		expect(testGrid.entries).toEqual([]);
-		expect(testGrid.rowCount).toBe(1);
-		expect(testGrid.columnCount).toBe(1);
+		expect(testGrid.rowCount).toBe(DEFAULT_ROW_COUNT);
+		expect(testGrid.columnCount).toBe(DEFAULT_COLUMN_COUNT);
 	});
 	it("should initialize properties from arguments to constructor", () => {
 		const entriesArg = ["test"];

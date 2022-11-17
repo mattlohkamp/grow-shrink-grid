@@ -1,8 +1,9 @@
-console.faked();
-
 export enum GridError {
 	DIMENSION_OUT_OF_BOUNDS = "DIMENSION_OUT_OF_BOUNDS",
 }
+
+export const DEFAULT_ROW_COUNT = 1;
+export const DEFAULT_COLUMN_COUNT = 1;
 
 export class Grid {
 	entries?: unknown[];
@@ -30,7 +31,11 @@ export class Grid {
 		}
 		this.#columnCount = value;
 	}
-	constructor(_entries: unknown[] = [], _rowCount = 1, _columnCount = 1) {
+	constructor(
+		_entries: unknown[] = [],
+		_rowCount = DEFAULT_ROW_COUNT,
+		_columnCount = DEFAULT_COLUMN_COUNT
+	) {
 		this.entries = _entries;
 		this.rowCount = _rowCount;
 		this.columnCount = _columnCount;
