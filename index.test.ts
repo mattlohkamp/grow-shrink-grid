@@ -1,7 +1,7 @@
-import Grid, { DEFAULT_COLUMN_COUNT, DEFAULT_ROW_COUNT, GridError } from ".";
+import Grid, { GridError, isDefaultGrid } from ".";
 
 describe("The Grid object", () => {
-	it("should throw an error with invalid arguments to constructor", () => {
+	it("throws an error on invalid arguments passed to constructor", () => {
 		try {
 			new Grid([], 0);
 			new Grid([], 1, 0);
@@ -10,13 +10,17 @@ describe("The Grid object", () => {
 			expect(error).toThrow(GridError.DIMENSION_OUT_OF_BOUNDS);
 		}
 	});
-	it("should instanciate with default values", () => {
-		const testGrid = new Grid();
-		expect(testGrid.entries).toEqual([]);
-		expect(testGrid.rowCount).toBe(DEFAULT_ROW_COUNT);
-		expect(testGrid.columnCount).toBe(DEFAULT_COLUMN_COUNT);
+	it("instanciates with default values", () => {
+		const testGrid1 = new Grid();
+		expect(isDefaultGrid(testGrid1)).toBe(true);
+		const testGrid2 = new Grid([]);
+		expect(isDefaultGrid(testGrid2)).toBe(true);
+		const testGrid3 = new Grid([], 1);
+		expect(isDefaultGrid(testGrid3)).toBe(true);
+		const testGrid4 = new Grid([], 1, 1);
+		expect(isDefaultGrid(testGrid4)).toBe(true);
 	});
-	it("should initialize properties from arguments to constructor", () => {
+	it("initializes properties from arguments passed to constructor", () => {
 		const entriesArg = ["test"];
 		const rowCountArg = 2;
 		const columnCountArg = 3;
@@ -24,5 +28,32 @@ describe("The Grid object", () => {
 		expect(testGrid.entries).toBe(entriesArg);
 		expect(testGrid.rowCount).toBe(rowCountArg);
 		expect(testGrid.columnCount).toBe(columnCountArg);
+	});
+	it("allows access to members by index", () => {
+		const entriesArg = ["a1", "a2", "b1", "b2"];
+		/*
+				A1 | A2
+				———————
+				B2 | B2
+		*/
+		const testGrid = new Grid(entriesArg, 2, 2);
+		const testIndex = 2; //	third entry - e.g. B2
+		expect(testGrid.entries?.[testIndex]).toBe(entriesArg[testIndex]);
+		expect(testGrid.getCellByIndex(testIndex)).toBe(entriesArg[testIndex]);
+	});
+	it("allows access to members by coordinates", () => {
+		const entriesArg = ["a1", "a2", "a3", "b1", "b2", "b3", "c1", "c2", "c3"];
+		/*
+				A1 | A2 | A3
+				————————————
+				B1 | B2 | B3
+				————————————
+				C1 | C2 | C3
+		*/
+		const testGrid = new Grid(entriesArg, 3, 3);
+		const [testCoordsX, testCoordsY] = [1, 2]; //	second column, third row - e.g. C2
+		expect(testGrid.getCellByCoordinates(testCoordsX, testCoordsY)).toBe(
+			entriesArg[7]
+		);
 	});
 });
