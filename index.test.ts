@@ -52,6 +52,7 @@ describe("The Grid object", () => {
 		*/
 		const testGrid = new Grid(entriesArg, 3, 3);
 		const [testCoordsX, testCoordsY] = [1, 2]; //	second column, third row - e.g. C2
+		//	TODO: add tests for invalid coords
 		expect(testGrid.getCellByCoordinates(testCoordsX, testCoordsY)).toBe(
 			entriesArg[7]
 		);
