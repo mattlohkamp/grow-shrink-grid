@@ -1,4 +1,3 @@
-// .lintstagedrc.js
 module.exports = {
-	"/**/*.ts": ["npm run lint"],
+	"/**/*.ts": ["npm run lint", "npm run test"],
 };

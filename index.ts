@@ -1,4 +1,4 @@
-console.fake();
+console.faked();
 
 export enum GridError {
 	DIMENSION_OUT_OF_BOUNDS = "DIMENSION_OUT_OF_BOUNDS",
