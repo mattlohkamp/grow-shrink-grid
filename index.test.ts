@@ -1,4 +1,4 @@
-import Grid, { GridError, isDefaultGrid } from '.';
+import Grid, { Direction, GridError, isDefaultGrid } from '.';
 
 describe('The Grid object', () => {
   it('throws an error on invalid arguments passed to constructor', () => {
@@ -61,34 +61,140 @@ describe('The Grid object', () => {
     expect(testGrid.getCellByIndex(testIndex)).toBe(entriesArg[testIndex]);
   });
   it('allows access to members by coordinates', () => {
-    const entriesArg = ['a1', 'a2', 'a3', 'b1', 'b2', 'b3', 'c1', 'c2', 'c3'];
+    const entriesArg = ['a1', 'a2', 'b1', 'b2'];
+    const testGrid = new Grid(entriesArg, 2, 2);
     /*
-				A1 | A2 | A3
-				————————————
-				B1 | B2 | B3
-				————————————
-				C1 | C2 | C3
+				A1 | A2
+				———————
+				B1 | B2
 		*/
-    const testGrid = new Grid(entriesArg, 3, 3);
-    //	second column, third row - e.g. C2
-    expect(testGrid.getCellByCoordinates(1, 2)).toBe(entriesArg[7]);
+    const testCell = testGrid.getCellByCoordinates(1, 1); //	second column, second row - e.g. B2
+    expect(testCell).toBe(entriesArg[3]);
   });
   it('errors out on invalid coordinates', () => {
-    //	prettier-ignore
-    const entriesArg = ['a1', 'a2', 'a3', 'a4', 'b1', 'b2', 'b3', 'b4', 'c1', 'c2', 'c3', 'c4'];
+    const entriesArg = ['a1', 'a2', 'b1', 'b2'];
+    const testGrid = new Grid(entriesArg, 2, 2);
     /*
-				A1 | A2 | A3 | A4
-				—————————————————
-				B1 | B2 | B3 | B4
-				—————————————————
-				C1 | C2 | C3 | C4
+				A1 | A2
+				———————
+				B1 | B2
 		*/
-    const testGrid = new Grid(entriesArg, 3, 4);
-    expect(() => testGrid.getCellByCoordinates(5, 0)).toThrow(
+    expect(() => testGrid.getCellByCoordinates(99, 0)).toThrow(
       GridError.COORDINATE_OUT_OF_BOUNDS
     );
-    expect(() => testGrid.getCellByCoordinates(-1, 0)).toThrow(
+    expect(() => testGrid.getCellByCoordinates(0, -99)).toThrow(
       GridError.COORDINATE_OUT_OF_BOUNDS
     );
+  });
+});
+
+describe('the Grid.grow method', () => {
+  it('inserts empty rows on top', () => {
+    const entriesArg = ['a1', 'a2', 'b1', 'b2'];
+    const testGrid = new Grid(entriesArg, 2, 2);
+    /*  BEFORE:
+				A1 | A2
+				———————
+				B1 | B2
+		*/
+    testGrid.grow(1, Direction.TOP); //  add one empty row to the top
+    /*  AFTER:
+				-- | --
+        ———————
+        A1 | A2
+				———————
+				B1 | B2
+		*/
+    expect(testGrid.rowCount).toBe(3);
+    expect(testGrid.entries).toMatchInlineSnapshot(`
+[
+  undefined,
+  undefined,
+  "a1",
+  "a2",
+  "b1",
+  "b2",
+]
+`);
+  });
+  it('inserts empty rows on bottom', () => {
+    const entriesArg = ['a1', 'a2', 'b1', 'b2'];
+    const testGrid = new Grid(entriesArg, 2, 2);
+    /*  BEFORE:
+				A1 | A2
+				———————
+				B1 | B2
+		*/
+    testGrid.grow(1, Direction.BOTTOM); //  add one empty row to the bottom
+    /*  AFTER:
+        A1 | A2
+				———————
+				B1 | B2
+        ———————
+        -- | --
+		*/
+    expect(testGrid.rowCount).toBe(3);
+    expect(testGrid.entries).toMatchInlineSnapshot(`
+[
+  "a1",
+  "a2",
+  "b1",
+  "b2",
+  undefined,
+  undefined,
+]
+`);
+  });
+  it('inserts empty columns on the left', () => {
+    const entriesArg = ['a1', 'a2', 'b1', 'b2'];
+    const testGrid = new Grid(entriesArg, 2, 2);
+    /*  BEFORE:
+				A1 | A2
+				———————
+				B1 | B2
+		*/
+    testGrid.grow(1, Direction.LEFT); //  add one empty row to the left
+    /*  AFTER:
+        -- | A1 | A2
+				————————————
+				-- | B1 | B2
+		*/
+    expect(testGrid.columnCount).toBe(3);
+    expect(testGrid.entries).toMatchInlineSnapshot(`
+[
+  undefined,
+  "a1",
+  "a2",
+  undefined,
+  "b1",
+  "b2",
+]
+`);
+  });
+  it('inserts empty columns on the right', () => {
+    const entriesArg = ['a1', 'a2', 'b1', 'b2'];
+    const testGrid = new Grid(entriesArg, 2, 2);
+    /*  BEFORE:
+				A1 | A2
+				———————
+				B1 | B2
+		*/
+    testGrid.grow(1, Direction.RIGHT); //  add one empty row to the right
+    /*  AFTER:
+        A1 | A2 | --
+				————————————
+				B1 | B2 | --
+		*/
+    expect(testGrid.columnCount).toBe(3);
+    expect(testGrid.entries).toMatchInlineSnapshot(`
+[
+  "a1",
+  "a2",
+  undefined,
+  "b1",
+  "b2",
+  undefined,
+]
+`);
   });
 });

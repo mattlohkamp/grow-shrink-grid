@@ -1,5 +1,16 @@
 // TODO: unify terminology for cols and x and rows and y
 
+export enum Direction {
+  LEFT = 'LEFT',
+  RIGHT = 'RIGHT',
+  LEFTRIGHT = 'LEFTRIGHT',
+  RIGHTLEFT = 'RIGHTLEFT',
+  TOP = 'TOP',
+  BOTTOM = 'BOTTOM',
+  TOPBOTTOM = 'TOPBOTTOM',
+  BOTTOMTOP = 'BOTTOMTOP',
+}
+
 export enum GridError {
   DIMENSION_OUT_OF_BOUNDS = 'OUT_OF_BOUNDS',
   COORDINATE_OUT_OF_BOUNDS = 'COORDINATE_OUT_OF_BOUNDS',
@@ -71,6 +82,49 @@ export class Grid<CellDataType = void> {
     this.rowCount = _rowCount;
     this.columnCount = _columnCount;
   }
+
+  grow(count: number, direction: Direction): void {
+    switch (direction) {
+      case Direction.TOP:
+        Array.prototype.unshift.apply(
+          this.entries,
+          Array(count * this.#columnCount)
+        );
+        this.rowCount += count;
+        break;
+      case Direction.BOTTOM:
+        Array.prototype.push.apply(
+          this.entries,
+          Array(count * this.#columnCount)
+        );
+        this.rowCount += count;
+        break;
+      case Direction.LEFT:
+        //  counting down so new entries don't throw off the indexing
+        for (let i = this.#rowCount - 1; i >= 0; i--) {
+          Array.prototype.splice.apply(this.entries, [
+            i * this.#rowCount,
+            0,
+            ...Array(count),
+          ]);
+        }
+        this.columnCount += count;
+        break;
+      case Direction.RIGHT:
+        this.columnCount += count;
+        for (let i = this.#rowCount; i >= 1; i--) {
+          Array.prototype.splice.apply(this.entries, [
+            i * this.#rowCount,
+            0,
+            ...Array(count),
+          ]);
+        }
+        break;
+      default:
+        console.warn(`invalid direction "${direction}"`);
+    }
+  }
+
   getCellByIndex(index: number): CellDataType | undefined {
     if (this.entries.length === 0) {
       console.warn(ErrorMessages[GridError.EMPTY_ENTRIES]);
