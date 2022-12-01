@@ -1,5 +1,3 @@
-// TODO: unify terminology for cols and x and rows and y
-
 export enum Direction {
   LEFT = 'LEFT',
   RIGHT = 'RIGHT',
@@ -99,26 +97,39 @@ export class Grid<CellDataType = void> {
         );
         this.rowCount += count;
         break;
+      //  counting down for left/right so new entries don't throw off the indexing
       case Direction.LEFT:
-        //  counting down so new entries don't throw off the indexing
-        for (let i = this.#rowCount - 1; i >= 0; i--) {
-          Array.prototype.splice.apply(this.entries, [
-            i * this.#rowCount,
-            0,
-            ...Array(count),
-          ]);
+        for (
+          let i = this.entries.length - this.columnCount;
+          i >= 0;
+          i -= this.columnCount
+        ) {
+          Array.prototype.splice.apply(this.entries, [i, 0, ...Array(count)]);
         }
         this.columnCount += count;
         break;
       case Direction.RIGHT:
-        this.columnCount += count;
-        for (let i = this.#rowCount; i >= 1; i--) {
-          Array.prototype.splice.apply(this.entries, [
-            i * this.#rowCount,
-            0,
-            ...Array(count),
-          ]);
+        for (let i = this.entries.length; i > 0; i -= this.columnCount) {
+          Array.prototype.splice.apply(this.entries, [i, 0, ...Array(count)]);
         }
+        this.columnCount += count;
+        break;
+      //  split insertions between two directions, preference given to first listed in keyword
+      case Direction.TOPBOTTOM:
+        this.grow(Math.ceil(count / 2), Direction.TOP);
+        this.grow(Math.floor(count / 2), Direction.BOTTOM);
+        break;
+      case Direction.BOTTOMTOP:
+        this.grow(Math.floor(count / 2), Direction.TOP);
+        this.grow(Math.ceil(count / 2), Direction.BOTTOM);
+        break;
+      case Direction.LEFTRIGHT:
+        this.grow(Math.ceil(count / 2), Direction.LEFT);
+        this.grow(Math.floor(count / 2), Direction.RIGHT);
+        break;
+      case Direction.RIGHTLEFT:
+        this.grow(Math.floor(count / 2), Direction.LEFT);
+        this.grow(Math.ceil(count / 2), Direction.RIGHT);
         break;
       default:
         console.warn(`invalid direction "${direction}"`);

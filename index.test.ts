@@ -89,14 +89,16 @@ describe('The Grid object', () => {
 });
 
 describe('the Grid.grow method', () => {
-  it('inserts empty rows on top', () => {
-    const entriesArg = ['a1', 'a2', 'b1', 'b2'];
-    const testGrid = new Grid(entriesArg, 2, 2);
+  let testGrid: Grid<string>;
+  beforeEach(() => {
+    testGrid = new Grid(['a1', 'a2', 'b1', 'b2'], 2, 2);
     /*  BEFORE:
 				A1 | A2
 				———————
 				B1 | B2
 		*/
+  });
+  it('inserts empty rows on top', () => {
     testGrid.grow(1, Direction.TOP); //  add one empty row to the top
     /*  AFTER:
 				-- | --
@@ -118,13 +120,6 @@ describe('the Grid.grow method', () => {
 `);
   });
   it('inserts empty rows on bottom', () => {
-    const entriesArg = ['a1', 'a2', 'b1', 'b2'];
-    const testGrid = new Grid(entriesArg, 2, 2);
-    /*  BEFORE:
-				A1 | A2
-				———————
-				B1 | B2
-		*/
     testGrid.grow(1, Direction.BOTTOM); //  add one empty row to the bottom
     /*  AFTER:
         A1 | A2
@@ -145,14 +140,65 @@ describe('the Grid.grow method', () => {
 ]
 `);
   });
-  it('inserts empty columns on the left', () => {
-    const entriesArg = ['a1', 'a2', 'b1', 'b2'];
-    const testGrid = new Grid(entriesArg, 2, 2);
-    /*  BEFORE:
-				A1 | A2
+  it('inserts empty rows split between top and bottom', () => {
+    testGrid.grow(3, Direction.TOPBOTTOM);
+    /*  AFTER:
+				-- | --
+        ———————
+      	-- | --
+        ———————
+        A1 | A2
 				———————
 				B1 | B2
+        ———————
+      	-- | --
 		*/
+    expect(testGrid.rowCount).toBe(5);
+    expect(testGrid.entries).toMatchInlineSnapshot(`
+[
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  "a1",
+  "a2",
+  "b1",
+  "b2",
+  undefined,
+  undefined,
+]
+`);
+  });
+  it('inserts empty rows split between bottom and top', () => {
+    testGrid.grow(3, Direction.BOTTOMTOP);
+    /*  AFTER:
+				-- | --
+        ———————
+        A1 | A2
+				———————
+				B1 | B2
+        ———————
+      	-- | --
+        ———————
+      	-- | --
+		*/
+    expect(testGrid.rowCount).toBe(5);
+    expect(testGrid.entries).toMatchInlineSnapshot(`
+[
+  undefined,
+  undefined,
+  "a1",
+  "a2",
+  "b1",
+  "b2",
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+]
+`);
+  });
+  it('inserts empty columns on the left', () => {
     testGrid.grow(1, Direction.LEFT); //  add one empty row to the left
     /*  AFTER:
         -- | A1 | A2
@@ -172,27 +218,68 @@ describe('the Grid.grow method', () => {
 `);
   });
   it('inserts empty columns on the right', () => {
-    const entriesArg = ['a1', 'a2', 'b1', 'b2'];
-    const testGrid = new Grid(entriesArg, 2, 2);
-    /*  BEFORE:
-				A1 | A2
-				———————
-				B1 | B2
-		*/
-    testGrid.grow(1, Direction.RIGHT); //  add one empty row to the right
+    testGrid.grow(2, Direction.RIGHT); //  add two empty rows to the right
     /*  AFTER:
-        A1 | A2 | --
-				————————————
-				B1 | B2 | --
+        A1 | A2 | -- | --
+				—————————————————
+				B1 | B2 | -- | --
 		*/
-    expect(testGrid.columnCount).toBe(3);
+    expect(testGrid.columnCount).toBe(4);
     expect(testGrid.entries).toMatchInlineSnapshot(`
 [
   "a1",
   "a2",
   undefined,
+  undefined,
   "b1",
   "b2",
+  undefined,
+  undefined,
+]
+`);
+  });
+  it('inserts empty columns split between left and right', () => {
+    testGrid.grow(3, Direction.LEFTRIGHT);
+    /*  AFTER:
+        -- | -- | A1 | A2 | --
+				——————————————————————
+				-- | -- | B1 | B2 | --
+		*/
+    expect(testGrid.columnCount).toBe(5);
+    expect(testGrid.entries).toMatchInlineSnapshot(`
+[
+  undefined,
+  undefined,
+  "a1",
+  "a2",
+  undefined,
+  undefined,
+  undefined,
+  "b1",
+  "b2",
+  undefined,
+]
+`);
+  });
+  it('inserts empty columns split between right and left', () => {
+    testGrid.grow(3, Direction.RIGHTLEFT);
+    /*  AFTER:
+        -- | A1 | A2 | -- | --
+				——————————————————————
+				-- | B1 | B2 | -- | --
+		*/
+    expect(testGrid.columnCount).toBe(5);
+    expect(testGrid.entries).toMatchInlineSnapshot(`
+[
+  undefined,
+  "a1",
+  "a2",
+  undefined,
+  undefined,
+  undefined,
+  "b1",
+  "b2",
+  undefined,
   undefined,
 ]
 `);
