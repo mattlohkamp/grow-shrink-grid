@@ -9,6 +9,11 @@ export enum Direction {
   BOTTOMTOP = 'BOTTOMTOP',
 }
 
+export enum Slice {
+  ROW = 'ROW',
+  COLUMN = 'COLUMN',
+}
+
 export enum GridError {
   DIMENSION_OUT_OF_BOUNDS = 'OUT_OF_BOUNDS',
   COORDINATE_OUT_OF_BOUNDS = 'COORDINATE_OUT_OF_BOUNDS',
@@ -81,19 +86,60 @@ export class Grid<CellDataType = void> {
     this.columnCount = _columnCount;
   }
 
+  /**
+   * @param {number} count the number of rows/columns to be inserted
+   * @param {string} slice whether to use rows or columns
+   * @param {number} index the index to begin inserting at
+   * @param {array} [data] optionally provide the content to be inserted
+   */
+  insertAt(
+    count: number,
+    slice: Slice,
+    index: number,
+    data: CellDataType[] = Array(count * this.columnCount)
+  ): void {
+    switch (slice) {
+      case Slice.ROW:
+        Array.prototype.splice.apply(this.entries, [
+          index * this.columnCount,
+          0,
+          ...data,
+        ]);
+        this.rowCount += count;
+        break;
+      case Slice.COLUMN:
+        for (let i = this.rowCount - 1; i >= 0; i--) {
+          this.entries.splice(
+            i * this.columnCount + index,
+            0,
+            // prettier-ignore
+            ...data.slice(i * count, (i * count) + count)
+          );
+        }
+        this.columnCount += count;
+        break;
+      default:
+        console.warn(`invalid slice "${slice}"`);
+    }
+  }
+
+  /**
+   * @param {number} count how many new rows or columns to add
+   * @param {string} direction which sides of the 2D grid to add the rows or columns to
+   */
   grow(count: number, direction: Direction): void {
     switch (direction) {
       case Direction.TOP:
         Array.prototype.unshift.apply(
           this.entries,
-          Array(count * this.#columnCount)
+          Array(count * this.columnCount)
         );
         this.rowCount += count;
         break;
       case Direction.BOTTOM:
         Array.prototype.push.apply(
           this.entries,
-          Array(count * this.#columnCount)
+          Array(count * this.columnCount)
         );
         this.rowCount += count;
         break;
@@ -144,26 +190,22 @@ export class Grid<CellDataType = void> {
     return this.entries?.[index];
   }
   getCellByCoordinates(x: number, y: number): CellDataType | undefined {
-    if (x < 0 || x >= this.#rowCount) {
+    if (x < 0 || x >= this.rowCount) {
       console.error(
-        ErrorMessages[GridError.COORDINATE_OUT_OF_BOUNDS](
-          'x',
-          x,
-          this.#rowCount
-        )
+        ErrorMessages[GridError.COORDINATE_OUT_OF_BOUNDS]('x', x, this.rowCount)
       );
       throw new Error(GridError.COORDINATE_OUT_OF_BOUNDS);
-    } else if (y < 0 || y >= this.#columnCount) {
+    } else if (y < 0 || y >= this.columnCount) {
       console.error(
         ErrorMessages[GridError.COORDINATE_OUT_OF_BOUNDS](
           'y',
           y,
-          this.#columnCount
+          this.columnCount
         )
       );
       throw new Error(GridError.COORDINATE_OUT_OF_BOUNDS);
     }
-    const index = Grid.getIndexFromXYCoordinates(x, y, this.#rowCount);
+    const index = Grid.getIndexFromXYCoordinates(x, y, this.rowCount);
     return this.entries[index];
   }
 }

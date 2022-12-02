@@ -1,4 +1,4 @@
-import Grid, { Direction, GridError, isDefaultGrid } from '.';
+import Grid, { Direction, GridError, isDefaultGrid, Slice } from '.';
 
 describe('The Grid object', () => {
   it('throws an error on invalid arguments passed to constructor', () => {
@@ -281,6 +281,104 @@ describe('the Grid.grow method', () => {
   "b2",
   undefined,
   undefined,
+]
+`);
+  });
+});
+
+describe('the Grid.insert method', () => {
+  let testGrid: Grid<string>;
+  beforeEach(() => {
+    testGrid = new Grid(['a1', 'a2', 'b1', 'b2'], 2, 2);
+    /*  BEFORE:
+				A1 | A2
+				———————
+				B1 | B2
+		*/
+  });
+  it('inserts an empty row at the specified index', () => {
+    testGrid.insertAt(1, Slice.ROW, 1); //  add one empty row to the middle
+    /*  AFTER:
+        A1 | A2
+				———————
+      	-- | --
+        ———————
+				B1 | B2
+		*/
+    expect(testGrid.rowCount).toBe(3);
+    expect(testGrid.entries).toMatchInlineSnapshot(`
+[
+  "a1",
+  "a2",
+  undefined,
+  undefined,
+  "b1",
+  "b2",
+]
+`);
+  });
+  it('inserts row data at the specified index', () => {
+    testGrid.insertAt(2, Slice.ROW, 1, ['x1', 'x2', 'y1', 'y2']); //  add two rows to the middle
+    /*  AFTER:
+        A1 | A2
+				———————
+        X1 | X2
+				———————
+        Y1 | Y2
+				———————
+				B1 | B2
+		*/
+    expect(testGrid.rowCount).toBe(4);
+    expect(testGrid.entries).toMatchInlineSnapshot(`
+[
+  "a1",
+  "a2",
+  "x1",
+  "x2",
+  "y1",
+  "y2",
+  "b1",
+  "b2",
+]
+`);
+  });
+  it('inserts an empty column at the specified index', () => {
+    testGrid.insertAt(1, Slice.COLUMN, 1); //  add one empty column to the middle
+    /*  AFTER:
+        A1 | -- | A2
+				————————————
+				B1 | -- | B2
+		*/
+    expect(testGrid.columnCount).toBe(3);
+    expect(testGrid.entries).toMatchInlineSnapshot(`
+[
+  "a1",
+  undefined,
+  "a2",
+  "b1",
+  undefined,
+  "b2",
+]
+`);
+  });
+  it('inserts column data at the specified index', () => {
+    testGrid.insertAt(2, Slice.COLUMN, 1, ['x1', 'x2', 'y1', 'y2']); //  add two columns to the middle
+    /*  AFTER:
+        A1 | X1 | X2 | A2
+				—————————————————
+				B1 | Y1 | Y2 | B2
+		*/
+    expect(testGrid.columnCount).toBe(4);
+    expect(testGrid.entries).toMatchInlineSnapshot(`
+[
+  "a1",
+  "x1",
+  "x2",
+  "a2",
+  "b1",
+  "y1",
+  "y2",
+  "b2",
 ]
 `);
   });
